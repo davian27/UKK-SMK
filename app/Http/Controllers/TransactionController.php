@@ -29,12 +29,12 @@ class TransactionController extends Controller
     {
         $photo = $request->file('proofs');
         $path = $photo->store('proofs', 'public');
-
         Transaction::create([
             'user_id' => $request->user_id,
             'total' => $request->total,
             'proofs' => $path,
             'description' => $request->description,
+            'transaction_date' => $request->transaction_date,
             'status' => $request->status,
         ]);
 
@@ -75,5 +75,13 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('transactions.index')->with('error', 'Failed to delete transaction. ' . $e->getMessage());
         }
+    }
+
+    public function acc(Transaction $transaction)
+    {
+        $transaction->update([
+            'status' => 'success'
+        ]);
+        return redirect()->route('transactions.index')->with('success', 'Transaction accepted successfully.');
     }
 }

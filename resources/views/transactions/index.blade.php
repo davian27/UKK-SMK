@@ -34,6 +34,10 @@
                             <label for="description" class="form-label">Deskripsi</label>
                             <textarea class="form-control" id="description" name="description"></textarea>
                         </div>
+                        <div class="form-group">
+                            <label for="transaction_date">Tanggal Transaksi</label>
+                            <input type="date" name="transaction_date" id="transaction_date" class="form-control" required>
+                        </div>
                         <div class="mb-3">
                             <label for="proofs" class="form-label">Bukti Transaksi</label>
                             <input type="file" class="form-control" id="proofs" name="proofs">
@@ -65,6 +69,7 @@
                     <p class="card-text"><strong>Harga:</strong> Rp {{ number_format($transaction->total, 0, ',', '.') }}</p>
                     <p class="card-text"><strong>Customer:</strong> {{ $transaction->users->name }}</p>
                     <p class="card-text"><strong>Deskripsi:</strong> {{ $transaction->description }}</p>
+                    <p class="card-text"><strong>Tanggal Transaksi : </strong>{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('j M Y') }}</p>
                     <p class="card-text"><strong>Bukti:</strong> <a href="{{ asset('storage/' . $transaction->proofs) }}" target="_blank">Lihat Bukti</a></p>
                     <p class="card-text">
                         <strong>Status:</strong>

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained();
             $table->string('description');
             $table->integer('total');
+            $table->date('transaction_date');
             $table->enum('status', ['pending', 'success', 'failed']);
             $table->timestamps();
         });
