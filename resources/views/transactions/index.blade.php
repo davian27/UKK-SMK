@@ -1,115 +1,296 @@
 @extends('layouts.app')
 
 @section('content')
-@hasrole('admin')
-<div class="container mt-4">
-    <h1>Daftar Transaksi</h1>
+<div class="container"> <!-- Ubah dari container-fluid ke container -->
+    <h1 class="h3 mb-4 text-gray-800">Daftar Transaksi</h1>
 
-    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Tambah Transaksi</button>
-@endhasrole
-    <!-- Modal Add Item -->
-    <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <!-- Tombol Tambah Transaksi -->
+    <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addTransactionModal">Tambah Transaksi</button>
+
+    <!-- Tabel Transaksi -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tabel Transaksi</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0" style="margin: 0 auto;">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Pengguna</th>
+                            <th>Deskripsi</th>
+                            <th>Total</th>
+                            <th>Tanggal Transaksi</th>
+                            <th>Status</th>
+                            <th>Bukti</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($transactions as $index => $transaction)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $transaction->users->name }}</td>
+                            <td>{{ $transaction->description }}</td>
+                            <td>Rp {{ number_format($transaction->total, 0, ',', '.') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($transaction->created_at)->format('j M Y') }}</td>
+                            <td>
+                                <span class="badge bg-{{ $transaction->status == 'pending' ? 'warning text-dark' : ($transaction->status == 'success' ? 'success' : 'danger') }}">
+                                    {{ ucfirst($transaction->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#proofModal{{ $transaction->id }}">
+                                    Lihat Bukti
+                                </button>
+                            </td>
+                            <td>
+                                @if($transaction->status == 'pending')
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#accTransactionModal{{ $transaction->id }}">Terima</button>
+                                @endif
+                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editTransactionModal{{ $transaction->id }}">Edit</button>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal{{ $transaction->id }}">Hapus</button>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="text-center">Tidak ada transaksi tersedia.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Aksi Transaksi (Terima, Edit, Hapus) -->
+@foreach ($transactions as $transaction)
+    <div class="modal fade" id="accTransactionModal{{ $transaction->id }}" tabindex="-1" aria-labelledby="accTransactionModalLabel{{ $transaction->id }}" aria-hidden="true">
         <div class="modal-dialog">
-            <form action="{{ route('transactions.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('transactions.acc', $transaction->id) }}" method="POST">
                 @csrf
+                @method('PATCH')
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addModalLabel">Tambah Transaksi Baru</h5>
+                        <h5 class="modal-title" id="accTransactionModalLabel{{ $transaction->id }}">Terima Transaksi</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="user_id" class="form-label">Pelanggan</label>
-                            <select class="form-control" id="user_id" name="user_id">
-                                @foreach ($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="total" class="form-label">Total</label>
-                            <input type="number" class="form-control" id="total" name="total">
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Deskripsi</label>
-                            <textarea class="form-control" id="description" name="description"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="proofs" class="form-label">Bukti Transaksi</label>
-                            <input type="file" class="form-control" id="proofs" name="proofs">
-                        </div>
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-control" id="status" name="status">
-                                <option value="pending">Pending</option>
-                                <option value="success">Success</option>
-                                <option value="failed">Failed</option>
-                            </select>
-                        </div>
+                        <p>Apakah Anda yakin ingin menerima transaksi ini dan mengubah status menjadi <strong>Success</strong>?</p>
+                        <p><strong>{{ $transaction->description }}</strong></p>
+                        <p><strong>Total: </strong>Rp {{ number_format($transaction->total, 0, ',', '.') }}</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-primary">Tambah Transaksi</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Terima</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+@endforeach
 
-    <!-- Tampilkan Daftar Transaksi dalam Card -->
-    <div class="row">
-        @foreach($transactions as $transaction)
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-body">
-                    <p class="card-text"><strong>Harga:</strong> Rp {{ number_format($transaction->total, 0, ',', '.') }}</p>
-                    <p class="card-text"><strong>Customer:</strong> {{ $transaction->users->name }}</p>
-                    <p class="card-text"><strong>Deskripsi:</strong> {{ $transaction->description }}</p>
-                    <p class="card-text"><strong>Bukti:</strong> <a href="{{ asset('storage/' . $transaction->proofs) }}" target="_blank">Lihat Bukti</a></p>
-                    <p class="card-text">
-                        <strong>Status:</strong>
-                        <span class="badge bg-{{ $transaction->status == 'pending' ? 'warning text-dark' : ($transaction->status == 'success' ? 'success' : 'danger') }}">
-                            {{ ucfirst($transaction->status) }}
-                        </span>
-                    </p>
-                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#showModal{{ $transaction->id }}">Lihat Detail</button>
+
+<!-- Modal Tambah Transaksi -->
+<div class="modal fade" id="addTransactionModal" tabindex="-1" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ route('transactions.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTransactionModalLabel">Tambah Transaksi Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Modal Show Transaction -->
-        <div class="modal fade" id="showModal{{ $transaction->id }}" tabindex="-1" aria-labelledby="showModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="showModalLabel">Detail Transaksi</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="user_id">Pilih Pengguna</label>
+                        <select name="user_id" id="user_id" class="form-control">
+                            @foreach ($users as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                    <div class="modal-body">
-                        <div class="d-flex">
-                            <div class="me-3">
-                                <img src="{{ asset('storage/' . $transaction->proofs) }}" alt="Bukti Pembayaran" class="img-fluid" style="max-width: 250px;">
-                            </div>
-                            <div>
-                                <p><strong>Harga:</strong> Rp {{ number_format($transaction->total, 0, ',', '.') }}</p>
-                                <p><strong>Customer:</strong> {{ $transaction->users->name }}</p>
-                                <p><strong>Deskripsi:</strong> {{ $transaction->description }}</p>
-                                <p>
-                                    <strong>Status:</strong>
-                                    <span class="badge bg-{{ $transaction->status == 'pending' ? 'warning text-dark' : ($transaction->status == 'success' ? 'success' : 'danger') }}">
-                                        {{ ucfirst($transaction->status) }}
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label for="description">Deskripsi Transaksi</label>
+                        <textarea name="description" id="description" class="form-control"></textarea>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <div class="form-group">
+                        <label for="proofs">Bukti Transaksi</label>
+                        <input type="file" name="proofs" id="proofs" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="total">Total Transaksi</label>
+                        <input type="number" name="total" id="total" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status Transaksi</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="pending">Pending</option>
+                            <option value="success">Success</option>
+                            <option value="failed">Failed</option>
+                        </select>
                     </div>
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan Transaksi</button>
+                </div>
             </div>
-        </div>
-        @endforeach
+        </form>
     </div>
 </div>
+
+<!-- Modal Edit Transaksi -->
+@foreach ($transactions as $transaction)
+<div class="modal fade" id="editTransactionModal{{ $transaction->id }}" tabindex="-1" aria-labelledby="editTransactionModalLabel{{ $transaction->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ route('transactions.update', $transaction->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTransactionModalLabel{{ $transaction->id }}">Edit Transaksi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="user_id">Pilih Pengguna</label>
+                        <select name="user_id" id="user_id" class="form-control">
+                            @foreach ($users as $user)
+                                <option value="{{ $user->id }}" {{ $user->id == $transaction->user_id ? 'selected' : '' }}>{{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Deskripsi Transaksi</label>
+                        <textarea name="description" id="description" class="form-control">{{ $transaction->description }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="proofs">Bukti Transaksi</label>
+                        <input type="file" name="proofs" id="proofs{{ $transaction->id }}" class="form-control" onchange="previewImage({{ $transaction->id }})">
+                        <div class="mt-2">
+                            <!-- Preview Image -->
+                            <img id="preview{{ $transaction->id }}" src="{{ $transaction->proofs ? Storage::url($transaction->proofs) : '' }}" alt="Preview" class="img-fluid" style="max-height: 200px; width: auto;">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="total">Total Transaksi</label>
+                        <input type="number" name="total" id="total" class="form-control" value="{{ $transaction->total }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status Transaksi</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="pending" {{ $transaction->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="success" {{ $transaction->status == 'success' ? 'selected' : '' }}>Success</option>
+                            <option value="failed" {{ $transaction->status == 'failed' ? 'selected' : '' }}>Failed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Update Transaksi</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@endforeach
+
+<!-- Modal Hapus Transaksi -->
+@foreach ($transactions as $transaction)
+<div class="modal fade" id="deleteTransactionModal{{ $transaction->id }}" tabindex="-1" aria-labelledby="deleteTransactionModalLabel{{ $transaction->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ route('transactions.destroy', $transaction->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteTransactionModalLabel{{ $transaction->id }}">Hapus Transaksi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus transaksi ini?</p>
+                    <p><strong>{{ $transaction->description }}</strong></p>
+                    <p><strong>Total: </strong>Rp {{ number_format($transaction->total, 0, ',', '.') }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+@endforeach
+
+<!-- Modal Lihat Bukti Transaksi -->
+@foreach ($transactions as $transaction)
+<div class="modal fade" id="proofModal{{ $transaction->id }}" tabindex="-1" aria-labelledby="proofModalLabel{{ $transaction->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="proofModalLabel{{ $transaction->id }}">Bukti Transaksi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Foto di sebelah kiri -->
+                    <div class="col-md-6">
+                        <strong>Bukti Transaksi:</strong>
+                        <br>
+                        @if($transaction->proofs)
+                            <a href="{{ Storage::url($transaction->proofs) }}" target="_blank">
+                                <img src="{{ Storage::url($transaction->proofs) }}" alt="Bukti Transaksi" class="img-fluid" style="max-height: 300px; width: auto;">
+                            </a>
+                        @else
+                            <p>Tidak ada bukti yang diunggah.</p>
+                        @endif
+                    </div>
+
+                    <!-- Deskripsi di sebelah kanan -->
+                    <div class="col-md-6 mt-4">
+                        <strong>Pengguna:</strong>
+                        <p>{{ $transaction->users->name }}</p>
+
+                        <strong>Deskripsi:</strong>
+                        <p>{{ $transaction->description }}</p>
+
+                        <strong>Total:</strong>
+                        <p>Rp {{ number_format($transaction->total, 0, ',', '.') }}</p>
+
+                        <strong>Status:</strong>
+                        <p>
+                            <span class="badge bg-{{ $transaction->status == 'pending' ? 'warning text-dark' : ($transaction->status == 'success' ? 'success' : 'danger') }}">
+                                {{ ucfirst($transaction->status) }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+
+<script>
+    function previewImage(transactionId) {
+        var file = document.getElementById('proofs' + transactionId).files[0];
+        var reader = new FileReader();
+
+        reader.onloadend = function() {
+            document.getElementById('preview' + transactionId).src = reader.result;
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            document.getElementById('preview' + transactionId).src = '';
+        }
+    }
+</script>
 @endsection
