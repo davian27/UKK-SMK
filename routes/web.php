@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\AccController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -21,7 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('items', ItemController::class);
     Route::resource('users', CustomerController::class);
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-    Route::put('/transactions.acc', [App\Http\Controllers\TransactionController::class]);
+    Route::patch('/transactions/{transaction}', [AccController::class, 'acc'])->name('transactions.acc');
 });
 
 

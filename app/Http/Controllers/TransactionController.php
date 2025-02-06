@@ -76,4 +76,6 @@ class TransactionController extends Controller
             return redirect()->route('transactions.index')->with('error', 'Failed to delete transaction. ' . $e->getMessage());
         }
     }
+
+
 }
