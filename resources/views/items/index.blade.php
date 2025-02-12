@@ -1,12 +1,26 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
-    @hasrole('admin')
-    <h1>Daftar Barang</h1>
+<h1 class="h3 mb-4 text-gray-800">Daftar Barang</h1>
 
-    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Tambah Barang</button>
-    @endhasrole
+<div class="d-flex justify-content-between align-items-center mb-3">
+    
+    <!-- Tombol Tambah barang -->
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+        Tambah Barang
+    </button>
+
+    <!-- Form Search -->
+    <form action="{{ route('items.index') }}" method="GET" class="d-flex align-items-center border p-2 rounded">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control bg-light border-0 small" placeholder="Cari barang..." value="{{ request('search') }}">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
     <!-- Modal Tambah Barang -->
     <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -50,21 +64,25 @@
 
     <!-- Tampilkan Daftar Barang dalam Card -->
     <div class="row">
-        @forelse($items as $index => $item)
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <img src="{{ asset('storage/'.$item->photo) }}" class="card-img-center object-fit-contain border rounded" alt="Foto Barang">
-                <div class="card-body">
-                    <h5 class="card-title">{{ $item->name }}</h5>
-                    <p class="card-text">Deskripsi : {{ Str::limit($item->description, 100) }}</p>
-                    <p class="card-text"><strong>Harga:</strong> Rp {{ number_format($item->price, 0, ',', '.') }}</p>
-                    <p class="card-text"><strong>Stock:</strong> {{$item->stock}}</p>
-                    <a href="#" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#showModal{{ $item->id }}">Lihat</a>
-                    <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ $item->id }}">Edit</a>
-                    <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $item->id }}">Hapus</a>
-                </div>
+    @forelse($items as $index => $item)
+    <div class="col-md-4 mb-4">
+        <div class="card h-100"> <!-- Tambahkan h-100 untuk memastikan tinggi card sama -->
+            <div class="card-img-top" style="height: 200px; overflow: hidden;"> <!-- Tetapkan tinggi tetap dan overflow hidden -->
+                <img src="{{ asset('storage/'.$item->photo) }}" class="img-fluid w-100 h-100 object-fit-cover" alt="Foto Barang"> <!-- Gunakan object-fit: cover -->
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{ $item->name }}</h5>
+                <p class="card-text">Deskripsi : {{ Str::limit($item->description, 100) }}</p>
+                <p class="card-text"><strong>Harga:</strong> Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+                <p class="card-text"><strong>Stock:</strong> {{$item->stock}}</p>
+                <a href="#" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#showModal{{ $item->id }}">Lihat</a>
+                @hasrole('admin')
+                <a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ $item->id }}">Edit</a>
+                <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $item->id }}">Hapus</a>
+                @endhasrole
             </div>
         </div>
+    </div>
         
         <!-- Modal Show -->
 
@@ -103,9 +121,6 @@
 </div>
 
 
-
-        
-        <!-- Modal Edit -->
         
 <!-- Modal Edit -->
 <div class="modal fade" id="editModal{{ $item->id }}" tabindex="-1" aria-labelledby="editModalLabel{{ $item->id }}" aria-hidden="true">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
@@ -12,11 +13,15 @@ class ItemController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $items = Item::orderBy('id', 'desc')->get();
+        $search = $request->search;
+        $items = Item::orderBy('id', 'desc')
+                ->where('name', 'like', "%$search%")
+                ->get();
         return view('items.index', compact('items'));
     }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -93,7 +98,7 @@ class ItemController extends Controller
             return redirect()->route('items.index')->with('success', 'Item deleted successfully.');
         } catch (\Exception $e) {
             // Menangkap pengecualian dan mengembalikan response error
-            return redirect()->route('items.index')->with('error', 'Failed to delete item. ' . $e->getMessage());
+            return redirect()->route('items.index')->with('error', 'Failed to delete item. ');
         }
     }
 }

@@ -29,7 +29,7 @@ class TransactionItemController extends Controller
      */
     public function store(StoreTransaction_ItemRequest $request)
     {
-        //
+        
     }
 
     /**
