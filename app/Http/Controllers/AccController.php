@@ -17,4 +17,13 @@ class AccController extends Controller
     
         return redirect()->route('transactions.index')->with('success', 'Transaksi diterima dan status diubah menjadi Success.');
     }
+
+    public function reject(Transaction $transaction)
+{
+    $transaction->update([
+        'status' => 'failed',
+        ]);
+
+    return redirect()->route('transactions.index')->with('success', 'Transaksi ditolak dan status diubah menjadi failed');
+}
 }

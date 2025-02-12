@@ -22,7 +22,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('items', ItemController::class);
     Route::resource('users', CustomerController::class);
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-    Route::patch('/transactions/{transaction}', [AccController::class, 'acc'])->name('transactions.acc');
+});
+
+Route::prefix('transactions')->group(function () {
+    Route::patch('/{transaction}/acc', [AccController::class, 'acc'])->name('transactions.acc');
+    Route::put('/{transaction}/reject', [AccController::class, 'reject'])->name('transactions.reject');
 });
 
 

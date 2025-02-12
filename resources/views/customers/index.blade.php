@@ -5,7 +5,7 @@
         <h1>Daftar Customer</h1>
 
         @hasrole('admin')
-            <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Tambah Pelanggan</button>
+            <!-- <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Tambah Pelanggan</button> -->
         @endhasrole
         <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
             <div class="modal-dialog">
