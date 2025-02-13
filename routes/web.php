@@ -14,13 +14,12 @@ Auth::routes();
 
 
 Route::middleware('auth', 'role:admin')->group(function () {
-    
 });
 
 Route::middleware('auth')->group(function () {
+    Route::resource('users', CustomerController::class);
     Route::resource('transactions', TransactionController::class);
     Route::resource('items', ItemController::class);
-    Route::resource('users', CustomerController::class);
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
 

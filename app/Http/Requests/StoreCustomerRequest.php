@@ -16,8 +16,6 @@ class StoreCustomerRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -25,6 +23,23 @@ class StoreCustomerRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email|max:255',
             'phone' => 'required|numeric|min:10|unique:users,phone',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'Nama wajib diisi',
+            'name.string' => 'Nama harus berupa teks',
+            'name.max' => 'Nama tidak boleh lebih dari 255 karakter',
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Format email tidak valid',
+            'email.unique' => 'Email sudah digunakan',
+            'email.max' => 'Email tidak boleh lebih dari 255 karakter',
+            'phone.required' => 'Nomor telepon wajib diisi',
+            'phone.numeric' => 'Nomor telepon harus berupa angka',
+            'phone.min' => 'Nomor telepon minimal 10 digit',
+            'phone.unique' => 'Nomor telepon sudah digunakan',
         ];
     }
 }

@@ -24,7 +24,6 @@ class TransactionController extends Controller
         ->orderBy('id', 'desc')->get();
         $items = Item::all();
         $users = User::role('customer')->get();
-        // dd($users->all());
         return view('transactions.index', compact('transactions', 'users','items'));
     }
 
@@ -64,6 +63,7 @@ class TransactionController extends Controller
         'total' => $total,
         'proofs' => $path,
         'description' => $request->description,
+        'transaction_date' => $request->transaction_date ?? now(),
         'status' => $request->status,
     ]);
 
