@@ -120,7 +120,6 @@
 
             @auth
             <!-- Sidebar Links for Authenticated Users -->
-
             <ul class="nav flex-column">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('users.index') }}">

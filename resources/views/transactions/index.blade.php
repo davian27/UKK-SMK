@@ -258,7 +258,7 @@
                                     @endforeach
 
                                 </select>
-                                <input type="number" name="quantities[]" class="form-control w-25" placeholder="Qty" min="1" value="1">
+                                <input type="number" name="quantities[]" class="form-control w-25" placeholder="Qty">
                                 <button type="button" class="btn btn-success ml-2 add-item">+</button>
                             </div>
                         </div>

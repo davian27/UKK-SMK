@@ -56,12 +56,12 @@
                                         <h5 class="card-title">{{ $customer->name }}</h5>
                                         <p class="card-text">{{ $customer->email }}</p>
                                         <p class="card-text">{{ $customer->phone }}</p>
-                                        @hasrole('admin')
+                                        @hasrole('customers')
                                             <div class="d-flex justify-content-end">
                                                 <button class="btn btn-warning btn-sm me-2" data-bs-toggle="modal"
                                                     data-bs-target="#editModal{{ $customer->id }}">Edit</button>
-                                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModal{{ $customer->id }}">Delete</button>
+                                                {{-- <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#deleteModal{{ $customer->id }}">Delete</button> --}}
                                             </div>
                                         @endhasrole
                                     </div>
