@@ -16,40 +16,43 @@ class StoreTransactionRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'proofs' => 'required',
             'user_id' => 'required|exists:users,id',
-            'transaction_date' => 'required|date',
-            'status' => 'required|in:pending,success,failed',
             'items' => 'required|array|min:1',
-            'items.*.quantity' => 'required|integer|min:1',
+            'items.*' => 'exists:items,id',
+            'quantities' => 'required|array|min:1',
+            'quantities.*' => 'required|integer|min:1',
+            'proofs' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'description' => 'nullable|string|max:255',
+            'transaction_date' => 'nullable|date',
+            'status' => 'required|in:pending,completed,canceled',
         ];
     }
 
-    public function messages()
+    /**
+     * Get the error messages for the defined validation rules.
+     */
+    public function messages(): array
     {
         return [
-            'proofs.required' => 'Bukti transaksi diperlukan',
-            'user_id.required' => 'ID pengguna diperlukan',
-            'user_id.exists' => 'ID pengguna tidak ditemukan',
-            'description.required' => 'Deskripsi diperlukan',
-            'description.max' => 'Deskripsi harus kurang dari 255 karakter',
-            'transaction_date.required' => 'Tanggal transaksi diperlukan',
-            'transaction_date.date' => 'Format tanggal transaksi tidak valid',
-            'status.required' => 'Status diperlukan',
-            'status.in' => 'Status harus salah satu dari berikut: pending, success, failed',
-            'items.array' => 'Format items tidak valid',
-            'items.min' => 'Setidaknya satu item harus dipilih',
-            'items.*.item_id.required' => 'ID item diperlukan',
-            'items.*.item_id.exists' => 'ID item tidak ditemukan',
-            'items.*.quantity.required' => 'Jumlah item diperlukan',
-            'items.*.quantity.integer' => 'Jumlah item harus berupa angka',
-            'items.*.quantity.min' => 'Jumlah item tidak boleh kurang dari 1',
+            'user_id.required' => 'Pengguna wajib diisi.',
+            'user_id.exists' => 'Pengguna tidak ditemukan.',
+            'items.required' => 'Minimal satu item harus dipilih.',
+            'items.*.exists' => 'Item yang dipilih tidak valid.',
+            'quantities.required' => 'Jumlah item harus diisi.',
+            'quantities.*.integer' => 'Jumlah item harus berupa angka.',
+            'quantities.*.min' => 'Jumlah item minimal 1.',
+            'proofs.image' => 'Bukti harus berupa gambar.',
+            'proofs.mimes' => 'Format gambar yang diperbolehkan: jpg, jpeg, png.',
+            'proofs.max' => 'Ukuran gambar maksimal 2MB.',
+            'description.string' => 'Deskripsi harus berupa teks.',
+            'description.max' => 'Deskripsi maksimal 255 karakter.',
+            'transaction_date.date' => 'Tanggal transaksi harus berupa tanggal yang valid.',
+            'status.required' => 'Status transaksi harus diisi.',
+            'status.in' => 'Status transaksi tidak valid.',
         ];
     }
 }

@@ -27,7 +27,6 @@ class UpdateItemRequest extends FormRequest
             'description' => 'required|string|max:1000',
             'price' => 'required|integer|min:0',
             'stock' => 'required|integer|min:0',
-            'supplier_id' => 'required|exists:suppliers,id',
         ];
     }
     public function messages(): array
@@ -46,8 +45,6 @@ class UpdateItemRequest extends FormRequest
             'stock.required' => 'Stok item wajib diisi.',
             'stock.integer' => 'Stok item harus berupa angka.',
             'stock.min' => 'Stok item tidak boleh kurang dari 0.',
-            'supplier_id.required' => 'Supplier wajib dipilih.',
-            'supplier_id.exists' => 'Supplier yang dipilih tidak valid.',
         ];
     }
 }
