@@ -48,7 +48,7 @@
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $transaction->users->name }}</td>
-                            <td>{{ $transaction->description }}</td>
+                            <td>{{ $transaction->description ?: 'Tidak Ada Deskripsi' }}</td>
                             <td>Rp {{ number_format($transaction->total, 0, ',', '.') }}</td>
                             <td>{{ \Carbon\Carbon::parse($transaction->created_at)->format('j M Y') }}</td>
                             <td>
@@ -72,7 +72,7 @@
                                 <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editTransactionModal{{ $transaction->id }}">Edit</button>
                                 @endif
                                 @if($transaction->status == 'success')
-                                <span class="badge bg-success text-light">Tombol Cetak Receipt Tersedia Pada Tombol Bukti</span>
+                                <span class="badge bg-success text-light">Pesanan selesai</span>
                                 @endif
                             </td>
                             <td>
@@ -258,7 +258,7 @@
                                     @endforeach
 
                                 </select>
-                                <input type="number" name="quantities[]" class="form-control w-25" placeholder="Qty">
+                                <input type="number" name="quantities[]" class="form-control w-25" placeholder="Qty" value="1">
                                 <button type="button" class="btn btn-success ml-2 add-item">+</button>
                             </div>
                         </div>
@@ -429,11 +429,11 @@
                 </div>
             </div>
             <div class="modal-footer">
-                @if ($transaction->status === 'success')
+                {{-- @if ($transaction->status === 'success')
                 <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#transactionModalShow{{ $transaction->id }}">
                     Cetak Receipt
                 </button>
-                @endif
+                @endif --}}
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
@@ -458,51 +458,85 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Event delegation untuk tombol Tambah Item di modal tambah transaksi
-        document.addEventListener('click', function(event) {
-            if (event.target.classList.contains('add-item')) {
-                let container = document.getElementById('items-container');
-                let newItem = document.createElement('div');
-                newItem.classList.add('d-flex', 'mb-2');
+        function updateAvailableItems(container) {
+            let selectedItems = Array.from(container.querySelectorAll('select[name="items[]"]'))
+                .map(select => select.value);
 
-                newItem.innerHTML = `
-                <select name="items[]" class="form-control mr-2">
-                    @foreach($items as $item)
-                    <option value="{{ $item->id }}">{{ $item->name }} - Rp{{ number_format($item->price, 0, ',', '.') }} - (Stok: {{ $item->stock }})</option>
-                    @endforeach
-                </select>
-                <input type="number" name="quantities[]" class="form-control w-25" placeholder="Qty" min="1" value="1">
-                <button type="button" class="btn btn-danger ml-2 remove-item">-</button>
-            `;
-                container.appendChild(newItem);
+            container.querySelectorAll('select[name="items[]"]').forEach(select => {
+                let currentValue = select.value;
+                select.querySelectorAll('option').forEach(option => {
+                    option.hidden = selectedItems.includes(option.value) && option.value !== currentValue;
+                });
+            });
+        }
+
+        // Untuk modal tambah transaksi
+        document.querySelector('.add-item').addEventListener('click', function() {
+            let container = document.getElementById('items-container');
+            let newItem = document.createElement('div');
+            newItem.classList.add('d-flex', 'mb-2');
+
+            newItem.innerHTML = `
+            <select name="items[]" class="form-control mr-2">
+                <option value="" selected disabled>Pilih Item</option>
+                @foreach($items as $item)
+                <option value="{{ $item->id }}">{{ $item->name }} - Rp{{ number_format($item->price, 0, ',', '.') }} ({{$item->stock}})</option>
+                @endforeach
+            </select>
+            <input type="number" name="quantities[]" class="form-control w-25" placeholder="Qty" value="1">
+            <button type="button" class="btn btn-danger ml-2 remove-item">-</button>
+        `;
+
+            container.appendChild(newItem);
+            updateAvailableItems(container);
+        });
+
+        // Untuk modal tambah transaksi (remove item)
+        document.getElementById('items-container').addEventListener('click', function(event) {
+            if (event.target.classList.contains('remove-item')) {
+                event.target.parentElement.remove();
+                updateAvailableItems(document.getElementById('items-container'));
             }
         });
 
-        // Event delegation untuk tombol Tambah Item di modal edit transaksi
-        document.addEventListener('click', function(event) {
-            if (event.target.classList.contains('add-item-edit')) {
-                let transactionId = event.target.getAttribute('data-transaction-id');
+        // Untuk modal edit transaksi
+        document.querySelectorAll('.add-item-edit').forEach(function(button) {
+            button.addEventListener('click', function() {
+                let transactionId = this.getAttribute('data-transaction-id');
                 let container = document.getElementById('edit-items-container-' + transactionId);
                 let newItem = document.createElement('div');
                 newItem.classList.add('d-flex', 'mb-2');
 
                 newItem.innerHTML = `
                 <select name="items[]" class="form-control mr-2">
+                    <option value="" selected disabled>Pilih Item</option>
                     @foreach($items as $item)
-                    <option value="{{ $item->id }}">{{ $item->name }} - Rp{{ number_format($item->price, 0, ',', '.') }} - (Stok: {{ $item->stock }})</option>
+                    <option value="{{ $item->id }}">{{ $item->name }} - Rp{{ number_format($item->price, 0, ',', '.') }} ({{$item->stock}})</option>
                     @endforeach
                 </select>
-                <input type="number" name="quantities[]" class="form-control w-25" placeholder="Qty" min="1" value="1">
+                <input type="number" name="quantities[]" class="form-control w-25" placeholder="Qty">
                 <button type="button" class="btn btn-danger ml-2 remove-item">-</button>
             `;
+
                 container.appendChild(newItem);
+                updateAvailableItems(container);
+            });
+        });
+
+        // Event delegation untuk tombol remove item (berlaku untuk semua modal)
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('remove-item')) {
+                let container = event.target.closest('#items-container, .edit-items-container');
+                event.target.parentElement.remove();
+                updateAvailableItems(container);
             }
         });
 
-        // Event delegation untuk tombol hapus item
-        document.addEventListener('click', function(event) {
-            if (event.target.classList.contains('remove-item')) {
-                event.target.parentElement.remove();
+        // Event listener untuk memastikan hanya satu item yang bisa dipilih
+        document.addEventListener('change', function(event) {
+            if (event.target.matches('select[name="items[]"]')) {
+                let container = event.target.closest('#items-container, .edit-items-container');
+                updateAvailableItems(container);
             }
         });
     });

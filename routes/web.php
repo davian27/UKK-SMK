@@ -28,4 +28,8 @@ Route::prefix('transactions')->group(function () {
     Route::put('/{transaction}/reject', [AccController::class, 'reject'])->name('transactions.reject');
 });
 
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
 

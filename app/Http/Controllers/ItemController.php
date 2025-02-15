@@ -54,31 +54,32 @@ class ItemController extends Controller
      * Update the specified resource in storage.
      */
     public function update(UpdateItemRequest $request, Item $item)
-    {
-        
-        // Memeriksa apakah ada foto baru yang diunggah
-        if ($request->hasFile('photo')) {
-            // Hapus foto lama jika ada
-            if ($item->photo) {
-                Storage::disk('public')->delete($item->photo);
-            }
-
-            // Simpan foto baru
-            $photo = $request->file('photo');
-            $path = $photo->store('items', 'public');
-            $item->photo = $path;
+{
+    // Memeriksa apakah ada foto baru yang diunggah
+    if ($request->hasFile('photo')) {
+        // Hapus foto lama jika ada
+        if ($item->photo) {
+            Storage::disk('public')->delete($item->photo);
         }
 
-        // Memperbarui atribut lainnya
-        $item->name = $request->name;
-        $item->description = $request->description;
-        $item->price = $request->price;
-
-        // Simpan perubahan
-        $item->save();
-
-        return redirect()->route('items.index')->with('success', 'Item updated successfully.');
+        // Simpan foto baru
+        $photo = $request->file('photo');
+        $path = $photo->store('items', 'public');
+        $item->photo = $path;
     }
+
+    // Memperbarui atribut lainnya
+    $item->name = $request->name;
+    $item->description = $request->description;
+    $item->price = $request->price;
+    $item->stock = $request->stock; // Perbaikan di sini
+
+    // Simpan perubahan
+    $item->save();
+
+    return redirect()->route('items.index')->with('success', 'Item updated successfully.');
+}
+
 
     /**
      * Remove the specified resource from storage.

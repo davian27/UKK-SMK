@@ -99,6 +99,17 @@ class TransactionController extends Controller
     // Hapus hubungan dengan item lama
     $transaction->items()->detach();
 
+    // Validasi stok sebelum mengupdate transaksi
+    foreach ($request->items as $index => $item_id) {
+        $item = Item::find($item_id);
+        if ($item) {
+            $quantity = $request->quantities[$index] ?? 1;
+            if ($item->stock < $quantity) {
+                return redirect()->back()->withErrors(["items.$index" => "Stok tidak mencukupi untuk item $item->name"]);
+            }
+        }
+    }
+
     // Simpan bukti transaksi jika ada file yang diunggah
     if ($request->hasFile('proof')) {
         if ($transaction->proof) {
