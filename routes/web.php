@@ -13,8 +13,8 @@ Auth::routes();
 
 
 
-Route::middleware('auth', 'role:admin')->group(function () {
-});
+// Route::middleware('auth', 'role:admin')->group(function () {
+// });
 
 Route::middleware('auth')->group(function () {
     Route::resource('users', CustomerController::class);
