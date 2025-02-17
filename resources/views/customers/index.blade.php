@@ -2,11 +2,22 @@
 
 @section('content')
     <div class="container mt-4">
-        <h1>Daftar Customer</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Daftar Customer</h1>
+            <form action="{{ route('users.index') }}" method="GET" class="d-flex align-items-center border p-2 rounded">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control bg-light border-0 small" placeholder="Cari customer..." value="{{ request('search') }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
 
         @hasrole('admin')
             <!-- <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">Tambah Pelanggan</button> -->
         @endhasrole
+
         <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">>

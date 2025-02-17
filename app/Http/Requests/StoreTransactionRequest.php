@@ -25,9 +25,9 @@ class StoreTransactionRequest extends FormRequest
             'items.*' => 'exists:items,id',
             'quantities' => 'required|array|min:1',
             'quantities.*' => 'required|integer|min:1',
-            'proofs' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'proofs' => 'required|image|mimes:jpg,jpeg,png|max:2048',
             'description' => 'nullable|string|max:255',
-            'transaction_date' => 'nullable|date',
+            'transaction_date' => 'required|date|after_or_equal:today',
             'status' => 'required|in:pending,completed,canceled',
         ];
     }
@@ -50,7 +50,9 @@ class StoreTransactionRequest extends FormRequest
             'proofs.max' => 'Ukuran gambar maksimal 2MB.',
             'description.string' => 'Deskripsi harus berupa teks.',
             'description.max' => 'Deskripsi maksimal 255 karakter.',
+            'transaction_date.required' => 'Tanggal transaksi harus diisi.',
             'transaction_date.date' => 'Tanggal transaksi harus berupa tanggal yang valid.',
+            'transaction_date.after_or_equal' => 'Tanggal transaksi tidak boleh kurang dari hari ini.',
             'status.required' => 'Status transaksi harus diisi.',
             'status.in' => 'Status transaksi tidak valid.',
         ];
