@@ -40,7 +40,9 @@
                             <th>Status</th>
                             <th>Bukti</th>
                             <th>Aksi</th>
+                            @hasrole('admin')
                             <th>Approval</th>
+                            @endhasrole
                         </tr>
                     </thead>
                     <tbody>
@@ -62,19 +64,28 @@
                                 </button>
                             </td>
                             <td>
-
+                                
+                                @hasrole('admin')
                                 @if($transaction->status == 'pending' || $transaction->status == 'failed')
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTransactionModal{{ $transaction->id }}">
                                     Hapus
                                 </button>
                                 @endif
+                                @endhasrole
                                 @if($transaction->status == 'pending')
                                 <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editTransactionModal{{ $transaction->id }}">Edit</button>
                                 @endif
                                 @if($transaction->status == 'success')
                                 <span class="badge bg-success text-light">Pesanan selesai</span>
                                 @endif
+                                @hasrole('customer')
+                                @if($transaction->status == 'failed')
+                                <span class="badge bg-danger text-light">Pesanan gagal</span>
+                                @endif
+                                @endhasrole
+                                
                             </td>
+                            @hasrole('admin')
                             <td>
                                 @if($transaction->status == 'pending')
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#accTransactionModal{{ $transaction->id }}">Terima</button>
@@ -85,6 +96,7 @@
                                 <span class="badge bg-danger text-light">Ditolak</span>
                                 @endif
                             </td>
+                            @endhasrole
                         </tr>
                         @empty
                         <tr>

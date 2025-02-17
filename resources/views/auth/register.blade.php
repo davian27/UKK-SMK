@@ -101,7 +101,7 @@
                                 <span
                                     style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 10px; padding-left: 10px; margin: auto;">
 
-                                    <i class="bx bx-user" style="margin-right: 10px; font-size: 16px; color: #666;"></i>
+                                    <i class="bx bx-phone" style="margin-right: 10px; font-size: 16px; color: #666;"></i>
                                     <input type="text" id="phone" name="phone" placeholder="No Telepon"
                                         style="border: none; outline: none; flex: 1; font-size: 14px; padding: 10px;">
                                 </span>
@@ -145,7 +145,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2"><button type="submit">Daftar Siswa</button></td>
+                            <td colspan="2"><button type="submit">Daftar Customer</button></td>
                         </tr>
                     </table>
                 </form>

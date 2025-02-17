@@ -4,11 +4,12 @@
 <h1 class="h3 mb-4 text-gray-800">Daftar Barang</h1>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    
+    @hasrole('admin')
     <!-- Tombol Tambah barang -->
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
         Tambah Barang
     </button>
+    @endhasrole
 
     <!-- Form Search -->
     <form action="{{ route('items.index') }}" method="GET" class="d-flex align-items-center border p-2 rounded">
