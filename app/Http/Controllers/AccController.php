@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Transaction;
+use App\Models\Item;
 
 class AccController extends Controller
 {
@@ -19,11 +20,20 @@ class AccController extends Controller
     }
 
     public function reject(Transaction $transaction)
-{
-    $transaction->update([
-        'status' => 'failed',
+    {
+        // Kembalikan stok barang ke nilai semula jika transaksi ditolak
+        foreach ($transaction->items as $item) {
+            $stockItem = Item::find($item->id);
+            if ($stockItem) {
+                $quantity = $item->pivot->quantity;
+                $stockItem->increment('stock', $quantity);
+            }
+        }
+    
+        $transaction->update([
+            'status' => 'failed',
         ]);
-
-    return redirect()->route('transactions.index')->with('success', 'Transaksi ditolak dan status diubah menjadi failed');
-}
+    
+        return redirect()->route('transactions.index')->with('success', 'Transaksi ditolak dan stok dikembalikan.');
+    }
 }

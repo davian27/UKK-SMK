@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
@@ -12,12 +13,16 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $customers = User::orderBy('created_at', 'desc')
-        ->role('customer')
-        ->where('id', '!=', auth()->id())
-        ->get();
+        $search = $request->search;
+        $customers = User::where('name', 'like', "%$search%")
+            ->orWhere('email', 'like', "%$search%")
+            ->orWhere('phone', 'like', "%$search%")
+            ->orderBy('id', 'desc')
+            ->role('customer')         
+            ->where('id', '!=', auth()->id())
+            ->get();
         return view('customers.index', compact('customers'));
     }
 
