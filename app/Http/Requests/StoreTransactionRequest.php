@@ -46,6 +46,7 @@ class StoreTransactionRequest extends FormRequest
             'quantities.*.integer' => 'Jumlah item harus berupa angka.',
             'quantities.*.min' => 'Jumlah item minimal 1.',
             'proofs.image' => 'Bukti harus berupa gambar.',
+            'proofs.required' => 'Bukti Transaksi Wajib Di Isi',
             'proofs.mimes' => 'Format gambar yang diperbolehkan: jpg, jpeg, png.',
             'proofs.max' => 'Ukuran gambar maksimal 2MB.',
             'description.string' => 'Deskripsi harus berupa teks.',
